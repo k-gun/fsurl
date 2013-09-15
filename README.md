@@ -5,9 +5,9 @@
 `$url = http://uri.li/cJjN`
 
 ```php
-$fsUrl = new fsUrl($url);
+$fsUrl = new FSUrl($url);
 
-// Execute cURL request
+// Execute request
 $fsUrl->run();
 
 print_r($fsUrl->getRequestHeaders());
