@@ -448,7 +448,6 @@ class FSUrl
     protected function _parseHeaders($headers) {
         $headersArr = array();
         $headersTmp = $headers;
-
         if (is_string($headersTmp)) {
             $headersTmp =@ explode("\r\n", $headers);
         }
