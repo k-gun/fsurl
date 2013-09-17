@@ -4,11 +4,14 @@ require_once './../FSUrl/FSUrl.php';
 
 $url = 'http://uri.li/cJjN';
 $fsUrl = new FSUrl($url);
-$fsUrl->setMethod(FSUrl::METHOD_POST);
+// $fsUrl->setMethod(FSUrl::METHOD_POST);
 $fsUrl->run();
 
-pre($fsUrl->getRequest());
-pre($fsUrl->getResponse());
+pre($fsUrl->getStatusCode());
+pre($fsUrl->getStatusText());
+
+// pre($fsUrl->getRequest());
+// pre($fsUrl->getResponse());
 
 die;
 
