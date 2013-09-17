@@ -473,7 +473,7 @@ class FSUrl
                 // E.g: HTTP/1.1 301 Moved Permanently
                 if (preg_match('~^HTTP/[\d\.]+ (\d+) ([\w- ]+)~i', $header, $matches)) {
                     $headersArr['status_code'] = (int) $matches[1];
-                    $headersArr['status_text'] = strval($matches[2]);
+                    $headersArr['status_text'] = trim($matches[2]);
                     continue;
                 }
                 @ list($key, $val) = explode(':', $header, 2);
