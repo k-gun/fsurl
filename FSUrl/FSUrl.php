@@ -344,7 +344,7 @@ class FSUrl
      * @param mixed $prepareKey (optional)
      */
     public function getResponseHeader($key, $prepareKey = true) {
-        if ($prepareKey && ($key != 'response_code' && $key != 'response_text')) {
+        if ($prepareKey && ($key != 'status_code' && $key != 'status_text')) {
             $key = preg_replace_callback('~_([a-z])~i', function($m){
                 return '-'. strtoupper($m[1]);
             }, ucfirst($key));

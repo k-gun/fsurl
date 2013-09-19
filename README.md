@@ -28,8 +28,8 @@ Array
     [content_type] => text/html
     [location] => http://google.com/
     [pragma] => no-cache
-    [response_code] => 301
-    [response_text] => Moved Permanently
+    [status_code] => 301
+    [status_text] => Moved Permanently
     [set_cookie] => Array
         (
             [0] => ...
@@ -39,10 +39,14 @@ Array
 )
 */
 
+// Check response status
+print $fsUrl->getStatusCode(); // 301
+print $fsUrl->getStatusText(); // Move Permanently
+
 // Work with response headers
 $responseHeaders = $fsUrl->getResponseHeaders();
-if ($responseHeaders['response_code'] >= 400) {
-    printf('Error: %s', $responseHeaders['response_text']);
+if ($responseHeaders['status_code'] >= 400) {
+    printf('Error: %s', $responseHeaders['status_text']);
 }
 
 // Work with response body
@@ -121,7 +125,7 @@ Content-Length: 0
 $fsUrl->getResponseBody();
 
 // get response header
-$fsUrl->getResponseHeader('response_code');
+$fsUrl->getResponseHeader('status_code');
 // get response headers
 $fsUrl->getResponseHeaders(); // array(...)
 // get response headers raw?
