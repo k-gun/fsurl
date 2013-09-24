@@ -74,8 +74,9 @@ print $fsUrl->getMethod() // POST
 - Request
 
 ```php
-// set headers
+// set headers (all available)
 $fsUrl->setRequestHeader('X-Foo-1: foo1');
+$fsUrl->setRequestHeader('X-Foo-1', 'foo1');
 $fsUrl->setRequestHeader(array('X-Foo-2: foo2'));
 $fsUrl->setRequestHeader(array('X-Foo-3' => 'foo3'));
 
