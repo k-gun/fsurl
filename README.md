@@ -5,13 +5,13 @@
 `$url = http://uri.li/cJjN`
 
 ```php
-$fsUrl = new FSUrl($url);
+$fs = new FSUrl($url);
 
 // Execute request
-$fsUrl->run();
+$fs->run();
 
-print_r($fsUrl->getRequestHeaders());
-print_r($fsUrl->getResponseHeaders());
+print_r($fs->getRequestHeaders());
+print_r($fs->getResponseHeaders());
 
 /* Result
 Array
@@ -40,17 +40,17 @@ Array
 */
 
 // Check response status
-print $fsUrl->getStatusCode(); // 301
-print $fsUrl->getStatusText(); // Move Permanently
+print $fs->getStatusCode(); // 301
+print $fs->getStatusText(); // Move Permanently
 
 // Work with response headers
-$responseHeaders = $fsUrl->getResponseHeaders();
+$responseHeaders = $fs->getResponseHeaders();
 if ($responseHeaders['status_code'] >= 400) {
     printf('Error: %s', $responseHeaders['status_text']);
 }
 
 // Work with response body
-$responseBody = $fsUrl->getResponseBody();
+$responseBody = $fs->getResponseBody();
 $dom = new Dom($responseBody); // trivial class just for example
 print $dom->getElementById('foo')->getAtrribute('src');
 ```
@@ -58,37 +58,37 @@ print $dom->getElementById('foo')->getAtrribute('src');
 - Set & get options
 
 ```php
-$fsUrl->setOption('timeout', 10);
+$fs->setOption('timeout', 10);
 
-print $fsUrl->getOption('timeout');
+print $fs->getOption('timeout');
 ```
 
 - Set & get method
 
 ```php
-$fsUrl->setMethod(FSUrl::METHOD_POST);
+$fs->setMethod(FSUrl::METHOD_POST);
 
-print $fsUrl->getMethod() // POST
+print $fs->getMethod() // POST
 ```
 
 - Request
 
 ```php
 // set headers
-$fsUrl->setRequestHeader('X-Foo-1: foo1');
-$fsUrl->setRequestHeader(array('X-Foo-2: foo2'));
-$fsUrl->setRequestHeader(array('X-Foo-3' => 'foo3'));
+$fs->setRequestHeader('X-Foo-1: foo1');
+$fs->setRequestHeader(array('X-Foo-2: foo2'));
+$fs->setRequestHeader(array('X-Foo-3' => 'foo3'));
 
 // set body (while posting data)
 // Note: Doesn't work if FSUrl method is GET
-$fsUrl->setRequestBody('foo=1&bar=The+bar%21');
-$fsUrl->setRequestBody(array(
+$fs->setRequestBody('foo=1&bar=The+bar%21');
+$fs->setRequestBody(array(
     'foo' => 1,
     'bar' => 'The bar!'
 ));
 
 // get raw equest
-print $fsUrl->getRequest();
+print $fs->getRequest();
 /*
 GET /cJjN HTTP/1.1
 User-Agent: FSUrl/v1.0
@@ -97,21 +97,21 @@ Host: uri.li
 */
 
 // get request body
-$fsUrl->getRequestBody();
+$fs->getRequestBody();
 
 // get request header
-$fsUrl->getRequestHeader('host');
+$fs->getRequestHeader('host');
 // get request headers
-$fsUrl->getRequestHeaders(); // array(...)
+$fs->getRequestHeaders(); // array(...)
 // get request headers raw?
-$fsUrl->getRequestHeaders(true);
+$fs->getRequestHeaders(true);
 ```
 
 - Response
 
 ```php
 // get raw response
-$fsUrl->getResponse();
+$fs->getResponse();
 /*
 HTTP/1.1 301 Moved Permanently
 Server: nginx
@@ -122,25 +122,48 @@ Content-Length: 0
 */
 
 // get response body
-$fsUrl->getResponseBody();
+$fs->getResponseBody();
 
 // get response header
-$fsUrl->getResponseHeader('status_code');
+$fs->getResponseHeader('status_code');
 // get response headers
-$fsUrl->getResponseHeaders(); // array(...)
+$fs->getResponseHeaders(); // array(...)
 // get response headers raw?
-$fsUrl->getResponseHeaders(true);
+$fs->getResponseHeaders(true);
 
 // not storing response headers & body
-$fsUrl->storeResponseHeaders(false);
-$fsUrl->storeResponseBody(false);
+$fs->storeResponseHeaders(false);
+$fs->storeResponseBody(false);
+```
+
+- Cookies
+
+```php
+// Login first
+$fs = new FSUrl('http://foo.com/login');
+$fs->setMethod(FSUrl::METHOD_POST);
+$fs->setRequestBody(array(
+    'username' => 'foo',
+    'password' => '****',
+));
+$fs->run();
+
+// Store cookies
+$cookies = $fs->getCookies();
+
+// User profile page (i.e: login requried page)
+$fs = new FSUrl('http://foo.com/profile');
+$fs->setRequestHeader('Cookie', $cookies);
+$fs->run();
+
+print $fs->getStatusCode(); // 200 (login ok)
 ```
 
 - Error handling
 
 ```php
-if ($fsUrl->isFail()) {
+if ($fs->isFail()) {
     printf('Error! Code[%d] Text[%s]',
-        $fsUrl->getFailCode(), $fsUrl->getFailText());
+        $fs->getFailCode(), $fs->getFailText());
 }
 ```

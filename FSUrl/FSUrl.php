@@ -65,6 +65,16 @@ class FSUrl
     protected $_failCode = 0,
               $_failText = '';
 
+    // Schemes & Ports maps
+    protected $_sp = array(
+        'http'  => array('protocol' => 'tcp://', 'port' => 80),
+        'https' => array('protocol' => 'ssl://', 'port' => 443),
+        // 'udp' => ... migth be extended
+    );
+
+    // Cookie store
+    protected $_cookies = null;
+
     /**
      * Make a new FSUrl instance (with the given arguments).
      *
@@ -74,26 +84,38 @@ class FSUrl
      */
     public function __construct($url, Array $options = array()) {
         // Parse URL
-        $url = parse_url($url);
+        extract(parse_url($url));
+
         // Check URL host
-        if (!isset($url['host'])) {
+        if (!isset($host)) {
             throw new FSUrlException('Host required!');
         }
-        isset($url['scheme'])   or $url['scheme'] = 'http';
-        isset($url['port'])     or $url['port'] = 80;
-        isset($url['path'])     or $url['path'] = '/';
-        isset($url['query'])    or $url['query'] = '';
-        isset($url['fragment']) or $url['fragment'] = '';
-        $this->_url = $url;
+        $fsHost = $host;
+
+        // Set scheme
+        isset($scheme) or $scheme = 'http';
+        // Set port & fs host
+        if (isset($this->_sp[$scheme])) {
+            $port = $this->_sp[$scheme]['port'];
+            $fsHost = $this->_sp[$scheme]['protocol'] . $host;
+        }
+        // Set path
+        isset($path) or $path = '/';
+        // Set query
+        $query = isset($query) ? '?'. $query : '';
+
+        $this->_url = compact(array(
+            'fsHost', 'scheme', 'host', 'port', 'path', 'query'
+        ));
 
         // Initial request headers
         $requestHeaders = array(
-            'Host'       => $this->_url['host'],
-            'Connection' => 'Close', // Important for quick responses!!!
-            'Accept'     => '*/*',
             'User-Agent' => isset($this->_requestHeaders['User-Agent'])
                 ? $this->_requestHeaders['User-Agent']
-                : 'FSUrl/v'. self::$_version .' (http://github.com/qeremy/FSUrl)',
+                : 'FSUrl/v'. self::$_version .' (+http://github.com/qeremy/fsurl)',
+            'Host'       => $this->_url['host'],
+            'Accept'     => '*/*',
+            'Connection' => 'close', // Important for a quick connection!!!
         );
         $this->setRequestHeader($requestHeaders);
     }
@@ -102,13 +124,13 @@ class FSUrl
      * Execute FSUrl.
      */
     public function run() {
-        // Get ready request & request headers
+        // Get request & request headers ready
         $this->_prepareRequest();
 
         // Open a socket connection
         $this->_fp =@ fsockopen(
-            $this->getUrl('host'),
-            $this->getUrl('port'),
+            $this->_url['fsHost'],
+            $this->_url['port'],
             $this->_failCode,
             $this->_failText,
             $this->getOption('timeout')
@@ -123,7 +145,10 @@ class FSUrl
             $meta = stream_get_meta_data($this->_fp);
 
             // Get response
-            while (!feof($this->_fp) && !$meta['timed_out']) {
+            while (!feof($this->_fp)) {
+                if ($meta['timed_out']) {
+                    throw new FSUrlException('Time out!');
+                }
                 $this->_response .= fgets($this->_fp, 1024);
                 $meta = stream_get_meta_data($this->_fp);
             }
@@ -240,21 +265,20 @@ class FSUrl
      *
      * @param string $body (required)
      */
-    public function setRequesBody($body) {
+    public function setRequestBody($body) {
         // Do not append if request method is GET
-        if ($this->_method != self::METHOD_GET) {
+        if ($this->_method == self::METHOD_GET) {
             return;
         }
         // Convert body to query string
         if (is_array($body)) {
             $body = http_build_query($body);
         }
+
         $this->_requestBody = (string) $body;
         // Add required headers
-        if ($this->_method == self::METHOD_POST) {
-            $this->setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            $this->setRequestHeader('Content-Length', strlen($this->_requestBody));
-        }
+        $this->setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        $this->setRequestHeader('Content-Length', strlen($this->_requestBody));
     }
 
     /**
@@ -264,6 +288,7 @@ class FSUrl
      * @param mixed $val (required|optional)
      */
     public function setRequestHeader($key, $val = null) {
+        // X-Foo => The Foo!
         if (is_array($key) && !empty($key)) {
             foreach ($key as $k => $v) {
                 if (is_int($k)) {
@@ -273,12 +298,15 @@ class FSUrl
                 }
             }
         }
+        // X-Foo: The Foo!
         if ($val === null) {
-            @ list($key, $val) = explode(':', $key, 2);
+            @list($key, $val) = explode(':', $key, 2);
         }
+
         if ($key) {
             $this->_requestHeaders[$key] = trim($val);
         }
+
         return $this;
     }
 
@@ -365,6 +393,22 @@ class FSUrl
     }
 
     /**
+     * Get response cookies ready to send later
+     *
+     * @return string
+     */
+    public function getCookies() {
+        if (empty($this->_cookies) && isset($this->_responseHeaders['Set-Cookie'])) {
+            $cookies = array();
+            foreach ((array) $this->_responseHeaders['Set-Cookie'] as $cookie) {
+                $cookies[] = preg_replace('~^([^;]+).*~', '\\1', trim($cookie));
+            }
+            $this->_cookies = join('; ', $cookies);
+        }
+        return $this->_cookies;
+    }
+
+    /**
      * Get response status code.
      */
     public function getStatusCode() {
@@ -417,11 +461,13 @@ class FSUrl
      * Prepare request headers.
      */
     protected function _prepareRequestHeaders() {
-        $this->_requestHeadersRaw = sprintf(
-            "%s %s HTTP/%s\r\n", $this->_method, $this->_url['path'], $this->_options['http_version']);
+        $this->_requestHeadersRaw = sprintf("%s %s HTTP/%s\r\n",
+            $this->_method, $this->_url['path'] . $this->_url['query'], $this->_options['http_version']);
+
         foreach ($this->_requestHeaders as $key => $val) {
             $this->_requestHeadersRaw .= "$key: $val\r\n";
         }
+
         if ($this->_method != self::METHOD_GET) {
             $this->setRequestHeader('Content-Length', strlen($this->_requestBody));
         }
@@ -433,7 +479,6 @@ class FSUrl
     protected function _prepareRequestBody() {
         if (is_array($this->_requestBody)) {
             $this->_requestBody = http_build_query($this->_requestBody);
-            $this->_requestBody = trim($this->_requestBody);
         }
     }
 

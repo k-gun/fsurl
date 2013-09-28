@@ -1,60 +1,45 @@
 <?php
-require_once './../FSUrl/FSUrlException.php';
-require_once './../FSUrl/FSUrl.php';
+header('Content-Type: text/plain; charset=utf-8');
 
-$url = 'http://uri.li/cJjN';
+require_once './../FSUrl/FSUrl.php';
+require_once './../FSUrl/FSUrlException.php';
+
+$url = 'http://obushu.com/login';
 $fsUrl = new FSUrl($url);
-// $fsUrl->setMethod(FSUrl::METHOD_POST);
+$fsUrl->setMethod(FSUrl::METHOD_POST);
+$fsUrl->setRequestBody(array(
+    'username' => 'foo',
+    'password' => '****',
+));
 $fsUrl->run();
 
-pre($fsUrl->getStatusCode());
-pre($fsUrl->getStatusText());
+// pre($fsUrl,1);
+pre($fsUrl->getRequest());
+pre($fsUrl->getResponseHeaders(true));
 
-// pre($fsUrl->getRequest());
-// pre($fsUrl->getResponse());
+pre("\n\n\n");
+
+$cookies = $fsUrl->getCookies();
+
+$url = 'http://obushu.com/';
+$fsUrl = new FSUrl($url);
+$fsUrl->setRequestHeader('Cookie', $cookies);
+$fsUrl->run();
+
+pre($fsUrl->getRequest());
+pre($fsUrl->getResponseHeaders(true));
+
+// pre($fsUrl->getStatusCode());
+// pre($fsUrl->getStatusText());
 
 die;
 
-// $url = 'http://www.facebook.com/';
-// $rdr = [$url];
-// do {
-//     $retry = false;
-//     $fsUrl = new FSUrl($url);
-//     $fsUrl->run();
-//     if ($fsUrl->getResponseHeader('response_code') != 200
-//             && ($url = $fsUrl->getResponseHeader('location'))) {
-//         $retry = true;
-//         $rdr[] = $url;
-//     }
-// } while ($retry && count($rdr) < 3);
-
-// pre($rdr);
-
-// $cookie ???
-
-
 /*
-$fp = fsockopen("dev.local", 80, $errno, $errstr, 30);
-if (!$fp) {
-    echo "$errstr ($errno)<br />\n";
-} else {
-    $out = "GET / HTTP/1.1\r\n";
-    $out .= "Host: dev.local\r\n";
-    $out .= "Connection: Close\r\n\r\n";
-    fwrite($fp, $out);
-    while (!feof($fp)) {
-        echo fgets($fp, 128);
-    }
-    fclose($fp);
-}
-
 $fp = fsockopen('www.google.com', 80, $errno, $errstr, 5);
-
 $input  = "GET /user/123 HTTP/1.1\r\n";
 $input .= "Host: www.example.com\r\n";
 $input .= "Connection: Close\r\n\r\n";
 fwrite($fp, $input);
-
 $result = '';
 while (!feof($fp)) {
     $result .= fgets($fp, 128);
@@ -70,7 +55,6 @@ fputs($fp, "Content-type: application/x-www-form-urlencoded\r\n");
 fputs($fp, "Content-length: ". strlen($data) ."\r\n");
 fputs($fp, "Connection: close\r\n\r\n");
 fputs($fp, $data);
-
 $result = '';
 while(!feof($fp)) {
     $result .= fgets($fp, 128);
@@ -79,7 +63,7 @@ fclose($fp);
 */
 
 function pre($s, $e = 0) {
-    printf('<pre>%s</pre>', print_r($s, 1));
+    printf("%s\n", print_r($s, 1));
     if ($e) exit;
 }
 
@@ -105,4 +89,12 @@ Array
     [1] => http://www.google.com/
     [2] => http://www.google.com.tr/?gws_rd=cr&ei=tbYbUtDEKs3HsgaxwYGQAg
 )
+
+simultaneously -> http://www.php.net/manual/en/function.fsockopen.php#33888
+
+Ilerde FSUrlRequest & FSUrlResponse diye ayir bunun icindekileri
+$responseHeaders      = $fs->response->getHeaders();
+$responseHeaderCookie = $fs->response->getHeader('Cookie');
+$responseStatusCode   = $fs->response->getStatuscode();
+...
 */
