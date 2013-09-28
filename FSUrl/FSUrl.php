@@ -16,14 +16,14 @@
  */
 
 /**
- * @class FSUrl v0.1
+ * @class FSUrl v0.2
  *
  * FSUrl object.
  */
 class FSUrl
 {
     // Version
-    protected static $_version = '0.1';
+    protected static $_version = '0.2';
 
     // Request methods
     const
