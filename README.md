@@ -151,7 +151,7 @@ $fs->run();
 // Store cookies
 $cookies = $fs->getCookies();
 
-// User profile page (i.e: login requried page)
+// User profile page (that login requried)
 $fs = new FSUrl('http://foo.com/profile');
 $fs->setRequestHeader('Cookie', $cookies);
 $fs->run();
