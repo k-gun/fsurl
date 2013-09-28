@@ -467,10 +467,6 @@ class FSUrl
         foreach ($this->_requestHeaders as $key => $val) {
             $this->_requestHeadersRaw .= "$key: $val\r\n";
         }
-
-        if ($this->_method != self::METHOD_GET) {
-            $this->setRequestHeader('Content-Length', strlen($this->_requestBody));
-        }
     }
 
     /**
