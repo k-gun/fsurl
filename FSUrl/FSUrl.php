@@ -78,8 +78,8 @@ class FSUrl
     /**
      * Make a new FSUrl instance (with the given arguments).
      *
-     * @param string $url (required)
-     * @param array  $options (optional)
+     * @param string $url
+     * @param array  $options
      * @throws FSUrlException
      */
     public function __construct($url, Array $options = array()) {
@@ -166,7 +166,7 @@ class FSUrl
     /**
      * Set request method
      *
-     * @param string $method (required)
+     * @param string $method
      */
     public function setMethod($method) {
         $this->_method = strtoupper($method);
@@ -175,7 +175,7 @@ class FSUrl
     /**
      * Set URL scheme
      *
-     * @param string $scheme (required)
+     * @param string $scheme
      */
     public function setScheme($scheme) {
         $this->_url['scheme'] = strtolower($scheme);
@@ -184,7 +184,7 @@ class FSUrl
     /**
      * Set URL host
      *
-     * @param string $host (required)
+     * @param string $host
      */
     public function setHost($host) {
         $this->_url['host'] = $host;
@@ -193,7 +193,7 @@ class FSUrl
     /**
      * Set URL port
      *
-     * @param int $port (required)
+     * @param int $port
      */
     public function setPort($port) {
         $this->_url['port'] = (int) $port;
@@ -202,8 +202,8 @@ class FSUrl
     /**
      * Set option
      *
-     * @param string $key (required)
-     * @param mixed $val (required)
+     * @param string $key
+     * @param mixed $val
      */
     public function setOption($key, $val) {
         $this->_options[$key] = $val;
@@ -240,7 +240,7 @@ class FSUrl
     /**
      * Get option
      *
-     * @param string $key (required)
+     * @param string $key
      */
     public function getOption($key) {
         if (isset($this->_options[$key])) {
@@ -251,7 +251,7 @@ class FSUrl
     /**
      * Get URL (or URL variable)
      *
-     * @param string $key (optional)
+     * @param string $key
      */
     public function getUrl($key = null) {
         if ($key === null) {
@@ -263,7 +263,7 @@ class FSUrl
     /**
      * Set request body
      *
-     * @param string $body (required)
+     * @param string $body
      */
     public function setRequestBody($body) {
         // Do not append if request method is GET
@@ -284,8 +284,8 @@ class FSUrl
     /**
      * Set request header(s).
      *
-     * @param mixed $key (required)
-     * @param mixed $val (required|optional)
+     * @param mixed $key
+     * @param mixed $val
      */
     public function setRequestHeader($key, $val = null) {
         // X-Foo => The Foo!
@@ -327,8 +327,8 @@ class FSUrl
     /**
      * Get request header.
      *
-     * @param string $key (required)
-     * @param mixed $prepareKey (optional)
+     * @param string $key
+     * @param mixed $prepareKey
      */
     public function getRequestHeader($key, $prepareKey = false) {
         if ($prepareKey) {
@@ -343,7 +343,7 @@ class FSUrl
     /**
      * Get request headers (raw).
      *
-     * @param bool $raw (optinal)
+     * @param bool $raw
      */
     public function getRequestHeaders($raw = false) {
         return !$raw
@@ -368,8 +368,8 @@ class FSUrl
     /**
      * Get response header.
      *
-     * @param string $key (required)
-     * @param mixed $prepareKey (optional)
+     * @param string $key
+     * @param mixed $prepareKey
      */
     public function getResponseHeader($key, $prepareKey = true) {
         if ($prepareKey && ($key != 'status_code' && $key != 'status_text')) {
@@ -384,7 +384,7 @@ class FSUrl
     /**
      * Get response headers (raw).
      *
-     * @param bool $raw (optinal)
+     * @param bool $raw
      */
     public function getResponseHeaders($raw = false) {
         return !$raw
@@ -504,7 +504,7 @@ class FSUrl
     /**
      * Parse headers.
      *
-     * @param mixed $headers (required)
+     * @param mixed $headers
      */
     protected function _parseHeaders($headers) {
         $headersArr = array();
